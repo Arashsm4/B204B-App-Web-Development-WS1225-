@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/electronics-shop
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+
+
+
+  # mapping port 3000 to 3000 so it matches the express server setup
+
+  # using the official mongo image for the db container
+
+  #it was first time using docker and meh liking this thing

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "part-1a2b3c",
+    "name": "Arduino Uno R3 Microcontroller",
+    "image": "https://via.placeholder.com/400x300/2c3e50/ffffff?text=Arduino+Uno+R3",
+    "priceCents": 2499,
+    "description": "Operating Voltage: 5V. Digital I/O Pins: 14. Analog Input Pins: 6. Flash Memory: 32 KB.",
+    "category": "Microcontrollers"
+  },
+  {
+    "id": "part-4d5e6f",
+    "name": "Breadboard - 830 Tie Points",
+    "image": "https://via.placeholder.com/400x300/34495e/ffffff?text=830+Point+Breadboard",
+    "priceCents": 550,
+    "description": "Standard 830 tie-points solderless breadboard. Wire size: 21 to 26 AWG. Great for circuit prototyping.",
+    "category": "Prototyping"
+  },
+  {
+    "id": "part-7g8h9i",
+    "name": "5mm LED Kit (Assorted)",
+    "image": "https://via.placeholder.com/400x300/e74c3c/ffffff?text=5mm+LED+Kit",
+    "priceCents": 899,
+    "description": "Forward Voltage: 1.8V - 3.2V (depends on color). Max Current: 20mA. Includes Red, Green, Blue, Yellow, and White.",
+    "category": "Components"
+  },
+  {
+    "id": "part-9j0k1l",
+    "name": "Raspberry Pi 4 Model B",
+    "image": "https://via.placeholder.com/400x300/8e44ad/ffffff?text=Raspberry+Pi+4",
+    "priceCents": 4500,
+    "description": "Broadcom BCM2711, Quad core Cortex-A72 (ARM v8) 64-bit SoC @ 1.5GHz. 4GB LPDDR4 RAM. 5V DC via USB-C.",
+    "category": "Microcomputers"
+  },
+  {
+    "id": "part-2m3n4o",
+    "name": "10k Ohm Resistor Kit",
+    "image": "https://via.placeholder.com/400x300/f39c12/ffffff?text=10k+Ohm+Resistors",
+    "priceCents": 350,
+    "description": "1/4 Watt, 5% tolerance carbon film resistors. Essential for pull-up/pull-down configurations.",
+    "category": "Components"
+  },
+  {
+    "id": "part-5p6q7r",
+    "name": "Digital Multimeter XL830L",
+    "image": "https://via.placeholder.com/400x300/27ae60/ffffff?text=Digital+Multimeter",
+    "priceCents": 1599,
+    "description": "Measures DC/AC voltage, DC current, and resistance. Includes diode and continuity test with buzzer.",
+    "category": "Tools"
+  }
+]

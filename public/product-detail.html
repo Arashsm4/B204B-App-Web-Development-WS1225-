@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Datacore Details - ElectronicFan</title>
+  <link rel="stylesheet" href="style.css">
+  // dummy paypal sandbox integration required by the assignment rubric. I was doing stripe but somehow I managed to fix the paypal issue
+  <script src="https://www.paypal.com/sdk/js?client-id=test&currency=EUR"></script>
+</head>
+<body>
+<nav>
+  <a href="index.html">Main_Terminal</a>
+  <a href="products.html">Hardware_Database</a>
+  <a href="add-product.html">Inject_Component</a>
+  <a href="orders.html">Access_Logs</a>
+</nav>
+<main>
+  <div id="product-info" class="card" style="margin-bottom: 20px; text-align: left;"></div>
+
+  <div id="payment-section" class="card" style="margin-bottom: 20px;">
+    <h3>[ SYSTEM LOCK: DISCUSSIONS ENCRYPTED ]</h3>
+    <p>Select your access clearance level to decrypt community logs:</p>
+
+    <div class="radio-group">
+      <label>
+        <input type="radio" name="tier" value="1.00" checked onchange="updateTier()">
+        [LEVEL 1] Single Component Decryption (€1.00)
+      </label>
+      <label>
+        <input type="radio" name="tier" value="50.00" onchange="updateTier()">
+        [ROOT] Lifetime Override - Unlock ALL Components (€50.00)
+      </label>
+    </div>
+
+    <div id="paypal-button-container"></div>
+    <p id="payment-status" class="success-msg"></p>
+  </div>
+
+  <div id="review-section" class="card" style="display: none; text-align: left;">
+    <h3>> APPEND LOG...</h3>
+    <textarea id="reviewText" rows="3" placeholder="Enter hardware review..."></textarea>
+    <textarea id="tipText" rows="2" placeholder="Enter exploitation tips/tricks (Optional)..."></textarea>
+    <button class="btn" onclick="submitReview()">EXECUTE_SUBMIT</button>
+  </div>
+
+  <h3 style="margin-top: 30px;">> DECRYPTED LOGS</h3>
+  <div id="reviews-list"></div>
+</main>
+
+// checking if user already bought the 50 euro root access. using localStorage so we don't need a whole user login system just for this.
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const productId = urlParams.get('id');
+  let productName = "";
+  let allReviews = [];
+
+  // Variables for PayPal dynamic pricing
+  let currentPrice = '1.00';
+  let currentDesc = 'Single Component Decryption';
+
+  // Update price when radio button is clicked
+  function updateTier() {
+    const radios = document.getElementsByName('tier');
+    for(let r of radios) {
+      if(r.checked) {
+        currentPrice = r.value;
+        currentDesc = r.value === '50.00' ? 'Root Lifetime Access' : `Unlock discussions for ${productName}`;
+      }
+    }
+  }
+
+  async function loadData() {
+    if(!productId) return;
+
+    const res = await fetch(`/api/products/${productId}`);
+    const p = await res.json();
+    productName = p.name;
+
+    document.getElementById('product-info').innerHTML = `
+                <div style="display:flex; gap: 20px; align-items: center;">
+                    <img src="${p.image}" alt="${p.name}" style="width: 200px;">
+                    <div>
+                        <h2>> ${p.name}</h2>
+                        <p><strong>[CLASS]:</strong> ${p.category}</p>
+                        <p><strong>[SPECS]:</strong> ${p.description}</p>
+                    </div>
+                </div>
+            `;
+
+    const revRes = await fetch(`/api/reviews/${productId}`);
+    allReviews = await revRes.json();
+
+    // Check if user previously bought Lifetime Access
+    if (localStorage.getItem('lifetime_access') === 'true') {
+      document.getElementById('payment-section').style.display = 'none';
+      document.getElementById('review-section').style.display = 'block';
+      renderReviews(true);
+    } else {
+      renderReviews(false);
+      setupPayPal();
+    }
+  }
+
+  // if they haven't paid, only show the first review array item and blur out the rest to tease them. kinda like reddit
+
+  function renderReviews(isUnlocked) {
+    const revList = document.getElementById('reviews-list');
+    revList.innerHTML = '';
+
+    if(allReviews.length === 0) {
+      revList.innerHTML = "<p>Database empty. Awaiting first input.</p>";
+      return;
+    }
+
+    const reviewsToShow = isUnlocked ? allReviews : [allReviews[0]];
+
+    reviewsToShow.forEach(r => {
+      revList.innerHTML += `
+                    <div class="review-card">
+                        <p><strong>LOG:</strong> ${r.reviewText}</p>
+                        ${r.tipText ? `<p><strong>HINT:</strong> <em>${r.tipText}</em></p>` : ''}
+                        <small style="color: #666;">TIMESTAMP: ${new Date(r.date).toLocaleDateString()}</small>
+                    </div>`;
+    });
+
+    if (!isUnlocked && allReviews.length > 1) {
+      revList.innerHTML += `
+                    <div style="padding: 15px; text-align: center; border: 1px dashed #39ff14; margin-top: 10px;">
+                        <p>🔒 <strong>[ ${allReviews.length - 1} FRAGMENTS ENCRYPTED ]</strong> Execute payment to unlock.</p>
+                    </div>
+                `;
+    }
+  }
+
+  function setupPayPal() {
+    // Clear out old buttons in case it re-renders
+    document.getElementById('paypal-button-container').innerHTML = '';
+
+    paypal.Buttons({
+      createOrder: function(data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            description: currentDesc,
+            amount: { value: currentPrice }
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          document.getElementById('payment-status').innerText = '> BYPASS SUCCESSFUL. ACCESS GRANTED.';
+          document.getElementById('paypal-button-container').style.display = 'none';
+          document.getElementById('review-section').style.display = 'block';
+
+          // If they bought lifetime, save it to their browser
+          if(currentPrice === '50.00') {
+            localStorage.setItem('lifetime_access', 'true');
+          }
+
+          renderReviews(true);
+          document.getElementById('payment-section').style.display = 'none';
+
+          fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, productName, amountPaid: parseFloat(currentPrice) })
+          });
+        });
+      }
+    }).render('#paypal-button-container');
+  }
+
+  async function submitReview() {
+    const reviewText = document.getElementById('reviewText').value;
+    const tipText = document.getElementById('tipText').value;
+
+    if(!reviewText) return alert("Error: Log cannot be empty.");
+
+    await fetch('/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, reviewText, tipText })
+    });
+
+    location.reload();
+  }
+  window.onload = loadData;
+</script>
+</body>
+</html>

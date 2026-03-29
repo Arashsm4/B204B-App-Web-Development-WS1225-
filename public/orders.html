@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unlock History - ElectronicFan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Component Library</a>
+    <a href="add-product.html">Contribute Part</a>
+    <a href="orders.html">Unlock History</a>
+</nav>
+<main>
+    <h2>Your Unlock History</h2>
+    <p>A list of access fees you've paid to unlock discussions.</p>
+
+    <table style="width: 100%; border-collapse: collapse; background: white; text-align: left;">
+        <thead>
+        <tr style="background: #2c3e50; color: white;">
+            <th style="padding: 10px;">Date</th>
+            <th style="padding: 10px;">Component Unlocked</th>
+            <th style="padding: 10px;">Fee Paid</th>
+            <th style="padding: 10px;">Status</th>
+        </tr>
+        </thead>
+        <tbody id="orders-list"></tbody>
+    </table>
+</main>
+
+<script>
+    async function fetchOrders() {
+        const res = await fetch('/api/orders');
+        const orders = await res.json();
+        const list = document.getElementById('orders-list');
+
+        if(orders.length === 0) {
+            list.innerHTML = '<tr><td colspan="4" style="padding: 15px;">No unlocks found.</td></tr>';
+            return;
+        }
+
+        orders.forEach(o => {
+            list.innerHTML += `
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 10px;">${new Date(o.date).toLocaleDateString()}</td>
+                        <td style="padding: 10px;">${o.productName}</td>
+                        <td style="padding: 10px; color: #e67e22;">€${o.amountPaid.toFixed(2)}</td>
+                        <td style="padding: 10px;">${o.paymentStatus}</td>
+                    </tr>
+                `;
+        });
+    }
+    window.onload = fetchOrders;
+</script>
+</body>
+</html>

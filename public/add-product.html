@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contribute Part - ElectronicFan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Component Library</a>
+    <a href="add-product.html">Contribute Part</a>
+    <a href="orders.html">Unlock History</a>
+</nav>
+<main>
+    <h2>Contribute a New Component</h2>
+    <p>Help grow the ElectronicFan database by adding new parts and datasheets.</p>
+    <div class="card" style="text-align: left;">
+        <form id="addProductForm">
+            <label>Component Name</label>
+            <input type="text" id="name" required>
+
+            <label>Estimated Market Value ($)</label>
+            <input type="number" id="price" required step="0.01">
+
+            <label>Image URL</label>
+            <input type="text" id="image" placeholder="https://...">
+
+            <label>Datasheet / Technical Description</label>
+            <textarea id="description" rows="3" required></textarea>
+
+            <button type="submit" class="btn">Add Component</button>
+        </form>
+        <p id="msg" class="success-msg"></p>
+    </div>
+</main>
+
+<script>
+    document.getElementById('addProductForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const dollars = parseFloat(document.getElementById('price').value);
+        const newProduct = {
+            id: 'part-' + Math.random().toString(36).substr(2, 9),
+            name: document.getElementById('name').value,
+            priceCents: Math.round(dollars * 100),
+            image: document.getElementById('image').value || 'https://via.placeholder.com/400x300?text=No+Image',
+            description: document.getElementById('description').value
+        };
+
+        const response = await fetch('/api/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newProduct)
+        });
+
+        if (response.ok) {
+            document.getElementById('msg').innerText = "Component added successfully!";
+            document.getElementById('addProductForm').reset();
+        } else {
+            document.getElementById('msg').innerText = "Error adding component.";
+            document.getElementById('msg').style.color = "red";
+        }
+    });
+</script>
+</body>
+</html>

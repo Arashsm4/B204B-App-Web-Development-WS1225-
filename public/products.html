@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Component Library - ElectronicFan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Component Library</a>
+    <a href="add-product.html">Contribute Part</a>
+    <a href="orders.html">Unlock History</a>
+</nav>
+<main>
+    <h2>Component Library & Datasheets</h2>
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="searchInput" placeholder="Search by component name...">
+        <button class="btn" style="margin-top: 0;" onclick="fetchProducts()">Search</button>
+    </div>
+
+    <div id="product-list" class="grid"></div>
+</main>
+
+<script>
+    async function fetchProducts() {
+        const search = document.getElementById('searchInput').value;
+        const res = await fetch(`/api/products?search=${search}`);
+        const products = await res.json();
+        const list = document.getElementById('product-list');
+        list.innerHTML = '';
+
+        if(products.length === 0) {
+            list.innerHTML = '<p>No components found.</p>';
+            return;
+        }
+
+        products.forEach(p => {
+            list.innerHTML += `
+                    <div class="card">
+                        <img src="${p.image}" alt="${p.name}">
+                        <h3>${p.name}</h3>
+                        <p style="color: #7f8c8d; font-size: 0.9rem;">Est. Value: $${(p.priceCents / 100).toFixed(2)}</p>
+                        <a href="product-detail.html?id=${p.id}" class="btn">View Specs & Discussions</a>
+                    </div>
+                `;
+        });
+    }
+    window.onload = fetchProducts;
+</script>
+</body>
+</html>
